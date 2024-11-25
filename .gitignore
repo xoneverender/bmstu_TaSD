@@ -1,0 +1,10 @@
+*.exe
+*.o
+*.gcno
+*.gcda
+*.gcov
+*.py
+*.tmp
+*.bin
+.DS_Store
+.vscode
