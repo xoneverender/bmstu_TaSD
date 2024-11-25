@@ -1,0 +1,9 @@
+-Wall
+-Werror
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/menu_actions.o
+src/menu_actions.c

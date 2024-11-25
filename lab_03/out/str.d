@@ -1,0 +1,9 @@
+-Wall
+-Werror
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/str.o
+src/str.c

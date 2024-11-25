@@ -1,0 +1,9 @@
+-Wall
+-Werror
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/files.o
+src/files.c

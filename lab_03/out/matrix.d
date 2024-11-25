@@ -1,0 +1,9 @@
+-Wall
+-Werror
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/matrix.o
+src/matrix.c

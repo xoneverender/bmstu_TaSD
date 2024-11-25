@@ -1,0 +1,9 @@
+-Wall
+-Werror
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/io.o
+src/io.c
