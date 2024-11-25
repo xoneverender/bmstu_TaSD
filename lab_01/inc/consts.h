@@ -1,0 +1,9 @@
+#ifndef CONSTS_H__
+#define CONSTS_H__
+
+#define MAX_EXP_SIZE 5
+#define MAX_MANTISSA_SIZE1 35
+#define MAX_MANTISSA_SIZE2 40
+#define MAX_RES_SIZE (MAX_MANTISSA_SIZE1 + MAX_MANTISSA_SIZE2)
+
+#endif
