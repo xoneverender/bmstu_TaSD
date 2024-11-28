@@ -8,12 +8,6 @@
 
 #define STACK_LEN 1000
 
-typedef struct 
-{
-    char data[STACK_LEN];
-    int top;                 
-} array_stack_t;
-
 typedef enum
 {
     OPERAND, 
@@ -30,10 +24,16 @@ typedef struct
     } content;  
 } data_t;   
 
+typedef struct 
+{
+    data_t *data[STACK_LEN];
+    size_t top;                 
+} array_stack_t;
+
 typedef struct node_t
 {
-    struct node *next;
-    data_t data;       
+    struct node_t *next;
+    data_t *data;
 } node_t;
 
 #endif /* STACK */
