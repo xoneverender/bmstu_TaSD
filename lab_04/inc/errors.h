@@ -2,14 +2,23 @@
 #define ERRORS
 
 #include <stdio.h>
+#include "colors.h"
 
 typedef enum
 {
     ERR_SUCCESS,
     ERR_EOF_REACHED,
-    ERROR_INVALID_STACK_INPUT,
-    ERR_INVALID_INPUT,
-    ERR_ALLOCATING_MEMORY
+    ERR_INVALID_STACK_INPUT,
+    ERR_READING_STRING,
+    ERR_ALLOCATING_MEMORY,
+    ERR_NULL_PTR,
+    ERR_EMPTY_STACK,
+    ERR_EMPTY_STRING,
+    ERR_STACK_OVERFLOW,
+    ERR_CALCULATIONS,
+    ERR_DIVISION_BY_ZERO
 } err_code_e;
+
+err_code_e process_error(err_code_e rc);
 
 #endif /* ERRORS */

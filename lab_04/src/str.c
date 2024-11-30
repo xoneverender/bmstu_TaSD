@@ -1,5 +1,49 @@
 #include "str.h"
 
+bool is_long_int(long *num, char *buffer)
+{
+    char *endptr, *end;    
+    
+    // Удаление пробелов в конце строки
+    while (buffer && isspace(*buffer))
+        buffer++;
+            
+    // Удаление пробелов в конце строки
+    end = buffer + strlen(buffer) - 1;
+    while (end > buffer && isspace(*end))
+        end--;
+    *(end + 1) = '\0';
+
+    *num = strtol(buffer, &endptr, 10);
+
+    if (*endptr != '\0' || endptr == buffer) 
+        return false;
+
+    return true; 
+}
+
+bool is_float(float *num, char *buffer)
+{
+    char *endptr, *end;    
+    
+    // Удаление пробелов в конце строки
+    while (buffer && isspace(*buffer))
+        buffer++;
+            
+    // Удаление пробелов в конце строки
+    end = buffer + strlen(buffer) - 1;
+    while (end > buffer && isspace(*end))
+        end--;
+    *(end + 1) = '\0';
+    
+    *num = strtod(buffer, &endptr);
+
+    if (*endptr != '\0' || endptr == buffer) 
+        return false;
+
+    return true; 
+}
+
 err_code_e read_string(FILE *stream, char **buf, size_t *len) 
 {   
     ssize_t nread;
@@ -17,34 +61,77 @@ err_code_e read_string(FILE *stream, char **buf, size_t *len)
         if (feof(stream)) 
             return ERR_EOF_REACHED;
 
-        return ERR_INVALID_INPUT;
+        return ERR_READING_STRING;
     }
 
     (*buf)[strcspn(*buf, "\n")] = '\0';
 
+    if (**buf == '\0')
+        return ERR_EMPTY_STRING;
+
     return ERR_SUCCESS;
 }
 
-bool is_whole_number(long *num, char *buffer)
+err_code_e extract_token(char **token, char *start, char *end)
 {
-    char *endptr;    
-    
-    *num = strtol(buffer, &endptr, 10);
+    int len = end - start;
 
-    if (*endptr != '\0' || endptr == buffer) 
-        return false;
+    *token = malloc(sizeof(char) * (len + 1));
+    if (!*token)
+        return ERR_ALLOCATING_MEMORY;
 
-    return true; 
+    *token = memcpy(*token, start, len);
+    *token[len] = '\0';
+
+    return ERR_SUCCESS;
 }
 
-bool is_float(float *num, char *buffer)
+err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, char *))
 {
-    char *endptr;    
+    err_code_e rc;
+    bool prev_is_int = false;
+    char *token_start, *token;
+
+    if (!buf)
+        return ERR_NULL_PTR;
+
+    while (buf)
+    {   
+        while (isspace(*buf))
+            buf++;
+            
+        if (strchr("+-*/", *buf) == NULL)
+        {
+            if (!prev_is_int)
+            {
+                prev_is_int = true;
+                token_start = buf;
+            }
+        }
+        else
+        {
+            if (prev_is_int)
+            {
+                prev_is_int = false;
+
+                if ((rc = extract_token(&token, token_start, buf)))
+                    return rc;
+
+                if ((rc = push_func(stack, token)) != ERR_SUCCESS)
+                {   
+                    free(token);
+                    return rc;
+                }
+            }
+            else 
+                return ERR_INVALID_STACK_INPUT;
+        }
+
+        buf++;
+    }
+
+    if (prev_is_int == false)
+        return ERR_INVALID_STACK_INPUT;
     
-    *num = strtod(buffer, &endptr);
-
-    if (*endptr != '\0' || endptr == buffer) 
-        return false;
-
-    return true; 
+    return ERR_SUCCESS;
 }
