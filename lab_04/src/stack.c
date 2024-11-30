@@ -106,68 +106,68 @@ void free_stack(void *stack, void (*free_func)(void *))
     free_func(stack);
 }
 
-err_code_e pop_from_array(void *stack, data_t **el)
+err_code_e pop_from_array(void *stack, data_t **el) 
 {
     array_stack_t *top = (array_stack_t *)stack;
 
     if (top == NULL)
         return ERR_NULL_PTR;
-    if (top->top < 0)
+    if (top->top <= 0)  // Проверка для пустого стека
         return ERR_EMPTY_STACK;
 
-    *el = top->data[--top->top];
+    *el = top->data[--top->top];  // Возвращаем указатель на удаляемый элемент
 
     return ERR_SUCCESS;
 }
 
-err_code_e pop_from_list(void *stack, data_t **el)
+err_code_e pop_from_list(void *stack, data_t **el) 
 {
     node_t **top = (node_t **)stack;
     node_t *current;
 
     if (top == NULL)
         return ERR_NULL_PTR;
-    else if (*top == NULL)
+    if (*top == NULL)
         return ERR_EMPTY_STACK;
 
     current = *top;
-    *el = current->data;
+    *el = current->data;  // Сохраняем данные для возврата
     *top = current->next;
 
-    free(current->data);
-    free(current);
+    free(current);  // Освобождаем текущий узел, но не данные
 
     return ERR_SUCCESS;
 }
 
-err_code_e pop(void *stack, removed_t *removed, data_t **el, err_code_e (*pop_func)(void *, data_t **el))
+
+err_code_e pop(void *stack, removed_t *removed, data_t **el, err_code_e (*pop_func)(void *, data_t **)) 
 {
     err_code_e rc;
     void **realoced_data = NULL;
-    
+
     if ((rc = pop_func(stack, el)) != ERR_SUCCESS)
         return rc;
-    
-    // выделение памяти для массива удаленных, если элемент удаляется впеовые
-    if (removed->data == NULL)
-    {   
-        removed->capacity = 50;        
-        removed->data = malloc(sizeof(void*) * removed->capacity);
+
+    // Выделение памяти для массива удалённых элементов
+    if (removed->data == NULL) 
+    {
+        removed->capacity = 50;
+        removed->data = malloc(sizeof(void *) * removed->capacity);
         if (!removed->data)
             return ERR_ALLOCATING_MEMORY;
     }
 
-    // перевыделение памяти, если должно случиться переполнение
-    if (removed->capacity <= removed->count)
+    // Перевыделение памяти при переполнении
+    if (removed->capacity <= removed->count) 
     {
-        removed->capacity += 50;    
-        realoced_data = realloc(realoced_data, sizeof(void*) * removed->capacity);
+        removed->capacity += 50;
+        realoced_data = realloc(removed->data, sizeof(void *) * removed->capacity);
         if (!realoced_data)
             return ERR_ALLOCATING_MEMORY;
         removed->data = realoced_data;
     }
 
-    // добавление адреса удаляемого элемента в массив removed
+    // Добавление адреса удалённого элемента
     removed->data[removed->count++] = *el;
 
     return ERR_SUCCESS;
@@ -206,3 +206,37 @@ void print_data(data_t *data)
         printf("Оператор: %c\n", data->content.operator);
     }
 }
+
+void init_action_funcs(action_funcs_t *funcs) 
+{
+    funcs->free = NULL;
+    funcs->pop = NULL;
+    funcs->print = NULL;
+    funcs->push = NULL;
+    funcs->stack = NULL;
+}
+
+void init_list_stack_funcs(action_funcs_t *funcs, node_t **stack) 
+{
+    if (funcs && stack) 
+    {
+        funcs->push = push_into_list;
+        funcs->pop = pop_from_list;
+        funcs->free = free_list;
+        funcs->print = operate_printing_list_stack;
+        funcs->stack = stack;
+    }
+}
+
+void init_array_stack_funcs(action_funcs_t *funcs, array_stack_t *stack) 
+{
+    if (funcs && stack) 
+    {
+        funcs->push = push_into_arr;
+        funcs->pop = pop_from_array;
+        funcs->free = free_array;
+        funcs->print = operate_printing_array_stack;
+        funcs->stack = stack;
+    }
+}
+

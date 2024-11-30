@@ -53,6 +53,8 @@ typedef struct
 } 
 action_funcs_t;
 
+#include "menu_actions.h"
+
 err_code_e define_data_type(data_t *data, char *token);
 err_code_e push_into_list(void *stack, data_t *data);
 err_code_e push_into_arr(void *stack, data_t *data);
@@ -65,5 +67,8 @@ err_code_e pop_from_list(void *stack, data_t **el);
 err_code_e pop(void *stack, removed_t *removed, data_t **el, err_code_e (*pop_from)(void *, data_t **el));
 err_code_e reverse_stack(void *src, void *dst, err_code_e (*push)(void *, data_t *), err_code_e (*pop)(void *, data_t **));
 void print_data(data_t *data);
+void init_action_funcs(action_funcs_t *funcs);
+void init_array_stack_funcs(action_funcs_t *funcs, array_stack_t *stack);
+void init_list_stack_funcs(action_funcs_t *funcs, node_t **stack);
 
 #endif /* STACK */

@@ -60,7 +60,8 @@ void operate_printing_array_stack(void *top)
 
 void operate_printing_list_stack(void *top)
 {
-    node_t *stack = (node_t *)top;
+    node_t **stack_ptr = (node_t **)top; // Correct cast and dereference
+    node_t *stack = *stack_ptr;          // Get the actual node_t*
 
     node_t *current = stack;
 
@@ -77,6 +78,8 @@ void operate_printing_list_stack(void *top)
     }
     puts("");
 }
+
+
 
 void operate_printing_removed(removed_t *removed)
 {
