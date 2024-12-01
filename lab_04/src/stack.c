@@ -147,6 +147,7 @@ err_code_e pop(void *stack, removed_t *removed, data_t **el, err_code_e (*pop_fu
 
     if ((rc = pop_func(stack, el)) != ERR_SUCCESS)
         return rc;
+        
 
     // Выделение памяти для массива удалённых элементов
     if (removed->data == NULL) 
@@ -178,12 +179,13 @@ err_code_e reverse_stack(void *src, void *dst, err_code_e (*push)(void *, data_t
     data_t *el;    
     err_code_e rc;
 
-    while (src)
+    while (1)
     {
-        if ((rc = pop(src, &el)) != ERR_SUCCESS)
-            return rc;
-        if ((rc = push(dst, el)) != ERR_SUCCESS)
-            return rc;
+        rc = pop(src, &el);
+        if (rc)
+            break;
+
+        push(dst, el);
     }
 
     return ERR_SUCCESS;

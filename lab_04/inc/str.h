@@ -16,6 +16,6 @@ err_code_e read_string(FILE *stream, char **buf, size_t *len);
 bool is_long_int(long *num, char *buffer);
 bool is_float(float *num, char *buffer);
 err_code_e extract_token(char **token, char *start, char *end);
-err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, char *));
+err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, data_t *));
 
 #endif /* STR */

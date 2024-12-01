@@ -36,6 +36,15 @@ err_code_e process_error(err_code_e rc)
         case ERR_DIVISION_BY_ZERO:
             puts(RED"Ошибка: попытка произвести деление на 0."RESET);
             break;
+        case ERR_INVALID_EXPRESSION_LEN:
+            puts(RED "Ошибка: получена некорректная длина выражения." RESET);
+            break;
+        case ERR_OPENING_FILE:
+            puts(RED "Ошибка: файл не может быть открыт." RESET);
+            break;
+        case ERR_INVALID_DATA_IN_FILE:
+            puts(RED "Ошибка: в файле содержатся некорректные данные." RESET);
+            break;
     }
     return rc;
 }

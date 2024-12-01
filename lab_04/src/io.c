@@ -33,10 +33,11 @@ void stack_operations_menu(void)
     puts("\nМЕНЮ\n");
     puts("1. Добавление элемента в стек.");
     puts("2. Удаление элемента из стека.");
-    puts("3. Вычисление значения выражения.");
-    puts("4. Просмотр стека.");
-    puts("5. Просмотр удаленных элементов.");
-    puts("6. Возврат в главное меню.");
+    puts("3. Вычисление значения выражения, содержащегося в стеке.");
+    puts("4. Вычисление значения выражения в введенной строке.");
+    puts("5. Просмотр стека.");
+    puts("6. Просмотр удаленных элементов.");
+    puts("7. Возврат в главное меню.");
     puts("0. Выход.\n");
 
     horizontal_rule();
@@ -70,7 +71,7 @@ err_code_e get_int_from_stdin(char *prompt, long *num, int min_val, int max_val,
     return rc;
 }
 
-err_code_e process_actions(const action_e action, menu_e *menu, removed_t *removed, action_funcs_t *funcs)
+err_code_e process_actions(const action_e action, menu_e *menu, removed_t *removed, action_funcs_t *funcs, mode_e mode)
 {
     err_code_e rc = ERR_SUCCESS;
 
@@ -110,10 +111,18 @@ err_code_e process_actions(const action_e action, menu_e *menu, removed_t *remov
                 puts(GREEN"Элемент успешно удален."RESET);
             }
             break;
-        case CALCULATE:
+        case CALCULATE_STACK:
             puts("\nВЫЧИСЛЕНИЕ ЗНАЧЕНИЯ ВЫРАЖЕНИЯ\n");
 
-            if ((rc = operate_calculating_rpn(funcs->stack, funcs->pop, funcs->push, funcs->free)))
+            if ((rc = operate_calculating_rpn(funcs->stack, funcs->pop, funcs->push, funcs->free, mode)))
+                process_error(rc);
+            else
+                puts(GREEN"Значение выражения вычислено успешно."RESET);
+            break;
+        case CALCULATE_STR:
+            puts("\nВЫЧИСЛЕНИЕ ЗНАЧЕНИЯ ВЫРАЖЕНИЯ В ВЕДЕННОЙ СТРОКЕ\n");
+
+            if ((rc = operate_calculating_rpn_from_string(funcs->stack, funcs->pop, funcs->push, funcs->free, mode)))
                 process_error(rc);
             else
                 puts(GREEN"Значение выражения вычислено успешно."RESET);
@@ -136,7 +145,7 @@ err_code_e process_actions(const action_e action, menu_e *menu, removed_t *remov
             {
                 if (funcs->free)
                     funcs->free(funcs->stack);
-                free(funcs);
+                // free(funcs);
             }
             exit(0);
             break;

@@ -16,7 +16,10 @@ typedef enum
     ERR_EMPTY_STRING,
     ERR_STACK_OVERFLOW,
     ERR_CALCULATIONS,
-    ERR_DIVISION_BY_ZERO
+    ERR_DIVISION_BY_ZERO,
+    ERR_INVALID_EXPRESSION_LEN,
+    ERR_OPENING_FILE,
+    ERR_INVALID_DATA_IN_FILE
 } err_code_e;
 
 err_code_e process_error(err_code_e rc);

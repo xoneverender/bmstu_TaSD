@@ -81,21 +81,22 @@ err_code_e extract_token(char **token, char *start, char *end)
         return ERR_ALLOCATING_MEMORY;
 
     *token = memcpy(*token, start, len);
-    *token[len] = '\0';
+    (*token)[len] = '\0';
 
     return ERR_SUCCESS;
 }
 
-err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, char *))
+err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, data_t *))
 {
     err_code_e rc;
     bool prev_is_int = false;
     char *token_start, *token;
+    char temp[2];
 
     if (!buf)
         return ERR_NULL_PTR;
 
-    while (buf)
+    do
     {   
         while (isspace(*buf))
             buf++;
@@ -117,20 +118,37 @@ err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, 
                 if ((rc = extract_token(&token, token_start, buf)))
                     return rc;
 
-                if ((rc = push_func(stack, token)) != ERR_SUCCESS)
+                if ((rc = push(stack, token, push_func)) != ERR_SUCCESS)
                 {   
                     free(token);
                     return rc;
                 }
+
+                if (*buf)
+                {
+                    temp[0] = *buf;
+                    temp[1] = 0;
+
+
+                    if ((rc = push(stack, temp, push_func)) != ERR_SUCCESS)
+                        return rc;
+                }
+                else
+                    break;
             }
-            else 
+            else
                 return ERR_INVALID_STACK_INPUT;
+
+            if (!*buf)
+                break;
         }
 
         buf++;
-    }
+    } while (1);
 
-    if (prev_is_int == false)
+    operate_printing_array_stack(stack);
+
+    if (strchr("+-/*", *(buf - 1)))
         return ERR_INVALID_STACK_INPUT;
     
     return ERR_SUCCESS;

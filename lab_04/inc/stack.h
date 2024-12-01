@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "errors.h"
-#include "str.h"
 
 #define STACK_CAPACITY 1000
 
@@ -54,6 +53,8 @@ typedef struct
 action_funcs_t;
 
 #include "menu_actions.h"
+
+#include "str.h"
 
 err_code_e define_data_type(data_t *data, char *token);
 err_code_e push_into_list(void *stack, data_t *data);

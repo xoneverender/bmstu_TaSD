@@ -8,8 +8,6 @@
 #include "calculations.h"
 #include "menu_actions.h"
 
-typedef enum {LEAVE, ARR_STACK, LINKED_LIST_STACK, COMPARE} mode_e;
-
 int main(void) 
 {
     err_code_e rc = ERR_SUCCESS;
@@ -34,6 +32,11 @@ int main(void)
     init_array_stack_funcs(&array_funcs, stack_arr);
     init_list_stack_funcs(&list_funcs, &stack_list);
 
+    removed = malloc(sizeof(removed_t));
+    removed->capacity = 0;
+    removed->count = 0;
+    removed->data = NULL;
+
     // Указатель на текущую структуру функций
     action_funcs_t *current_funcs = NULL; 
 
@@ -52,7 +55,7 @@ int main(void)
             switch (mode) 
             {
                 case LEAVE:
-                    process_actions(EXIT, &menu, NULL, current_funcs);
+                    process_actions(EXIT, &menu, NULL, current_funcs, mode);
                     break;
                 case ARR_STACK:
                     menu = STACK_OPERATIONS_MENU;
@@ -70,13 +73,13 @@ int main(void)
         {
             stack_operations_menu();
 
-            prompt = "Выберите действие (от 0 до 6): ";
-            error_message = "Выбранный пункт меню должен быть целым числом от 0 до 6. Повторите ввод.";
+            prompt = "Выберите действие (от 0 до 7): ";
+            error_message = "Выбранный пункт меню должен быть целым числом от 0 до 7. Повторите ввод.";
             if ((rc = get_int_from_stdin(prompt, &choice, 0, 6, error_message)) != ERR_SUCCESS)
                 return process_error(rc);
 
             action = choice;
-            if ((rc = process_actions(action, &menu, removed, current_funcs)) == ERR_EOF_REACHED)
+            if ((rc = process_actions(action, &menu, removed, current_funcs, mode)) == ERR_EOF_REACHED)
                 return rc;
         }
     }
