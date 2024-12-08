@@ -1,5 +1,5 @@
-#ifndef IO
-#define IO
+#ifndef IO_H
+#define IO_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,4 +43,4 @@ void stack_operations_menu(void);
 err_code_e get_int_from_stdin(char *prompt, long *num, int min_val, int max_val, char *error_message);
 err_code_e process_actions(const action_e action, menu_e *menu, removed_t *removed, action_funcs_t *funcs, mode_e mode);
 
-#endif /* IO */
+#endif /* IO_H */

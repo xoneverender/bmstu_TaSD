@@ -23,25 +23,34 @@ err_code_e define_data_type(data_t *data, char *token)
 
 err_code_e push_into_list(void *stack, data_t *data)
 {
-    node_t **top = (node_t **)stack;
+    if (!stack)
+        return ERR_NULL_PTR;
 
-    node_t *new_top = malloc(sizeof(node_t));
+    list_stack_t **top = (list_stack_t **)stack;
+
+    list_stack_t *new_top = malloc(sizeof(list_stack_t));
     if (!new_top)
         return ERR_ALLOCATING_MEMORY;
 
     new_top->data = data;
-    new_top->next = *top;
 
-    *top = new_top;
+    // Проверка *top перед использованием
+    if (!*top)
+        new_top->next = NULL; // Если стек пуст
+    else
+        new_top->next = *top; // Устанавливаем новый "верх"
+
+    *top = new_top; // Обновляем указатель на вершину стека
 
     return ERR_SUCCESS;
 }
+
 
 err_code_e push_into_arr(void *stack, data_t *data)
 {
     array_stack_t *top = (array_stack_t *)stack;
 
-    if (top->top - 1 >= STACK_CAPACITY)
+    if (top->top >= STACK_CAPACITY)
         return ERR_STACK_OVERFLOW;
 
     top->data[top->top++] = data;
@@ -77,8 +86,8 @@ void free_list(void *stack)
     if (!stack)
         return;
 
-    node_t **top = (node_t **)stack;
-    node_t *current;
+    list_stack_t **top = (list_stack_t **)stack;
+    list_stack_t *current;
     
     while (*top)
     {
@@ -122,8 +131,8 @@ err_code_e pop_from_array(void *stack, data_t **el)
 
 err_code_e pop_from_list(void *stack, data_t **el) 
 {
-    node_t **top = (node_t **)stack;
-    node_t *current;
+    list_stack_t **top = (list_stack_t **)stack;
+    list_stack_t *current;
 
     if (top == NULL)
         return ERR_NULL_PTR;
@@ -201,11 +210,11 @@ void print_data(data_t *data)
 
     if (data->type == OPERAND)
     {
-        printf("Операнд: %.6f\n", data->content.value);
+        printf("Операнд: %.6f", data->content.value);
     }
     else if (data->type == OPERATOR)
     {
-        printf("Оператор: %c\n", data->content.operator);
+        printf("Оператор: %c", data->content.operator);
     }
 }
 
@@ -218,7 +227,7 @@ void init_action_funcs(action_funcs_t *funcs)
     funcs->stack = NULL;
 }
 
-void init_list_stack_funcs(action_funcs_t *funcs, node_t **stack) 
+void init_list_stack_funcs(action_funcs_t *funcs, list_stack_t **stack) 
 {
     if (funcs && stack) 
     {

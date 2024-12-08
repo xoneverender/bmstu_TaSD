@@ -26,7 +26,7 @@ int main(void)
     stack_arr->top = 0;
 
     // Инициализация спискового стека
-    node_t *stack_list = NULL;
+    list_stack_t *stack_list = NULL;
 
     // Настройка функций для массивного и спискового стеков
     init_array_stack_funcs(&array_funcs, stack_arr);
@@ -66,6 +66,11 @@ int main(void)
                     current_funcs = &list_funcs;
                     break;
                 case COMPARE:
+                    puts("");
+                    horizontal_rule();
+                    puts("\nСРАВНЕНИЕ ПРОИЗВОДИТЕЛЬНОСТИ СТЕКА НА МАССИВЕ И СТЕКА НА СПИСКЕ\n");
+                    rc = operate_comparizon();
+                    process_error(rc);
                     break;
             }
         } 
@@ -75,7 +80,7 @@ int main(void)
 
             prompt = "Выберите действие (от 0 до 7): ";
             error_message = "Выбранный пункт меню должен быть целым числом от 0 до 7. Повторите ввод.";
-            if ((rc = get_int_from_stdin(prompt, &choice, 0, 6, error_message)) != ERR_SUCCESS)
+            if ((rc = get_int_from_stdin(prompt, &choice, 0, 7, error_message)) != ERR_SUCCESS)
                 return process_error(rc);
 
             action = choice;

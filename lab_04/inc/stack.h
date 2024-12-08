@@ -29,11 +29,11 @@ typedef struct
     int top;                 
 } array_stack_t;
 
-typedef struct node_t
+typedef struct list_stack_t
 {
-    struct node_t *next;
+    struct list_stack_t *next;
     data_t *data;
-} node_t;
+} list_stack_t;
 
 typedef struct
 {
@@ -70,6 +70,6 @@ err_code_e reverse_stack(void *src, void *dst, err_code_e (*push)(void *, data_t
 void print_data(data_t *data);
 void init_action_funcs(action_funcs_t *funcs);
 void init_array_stack_funcs(action_funcs_t *funcs, array_stack_t *stack);
-void init_list_stack_funcs(action_funcs_t *funcs, node_t **stack);
+void init_list_stack_funcs(action_funcs_t *funcs, list_stack_t **stack);
 
 #endif /* STACK */

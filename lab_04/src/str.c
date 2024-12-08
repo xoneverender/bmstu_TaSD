@@ -131,7 +131,10 @@ err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, 
 
 
                     if ((rc = push(stack, temp, push_func)) != ERR_SUCCESS)
+                    {   
+                        free(token);
                         return rc;
+                    }
                 }
                 else
                     break;
@@ -146,10 +149,11 @@ err_code_e parse_string(char *buf, void *stack, err_code_e (*push_func)(void *, 
         buf++;
     } while (1);
 
-    operate_printing_array_stack(stack);
-
     if (strchr("+-/*", *(buf - 1)))
+    {
+        free(token);
         return ERR_INVALID_STACK_INPUT;
+    }
     
     return ERR_SUCCESS;
 }

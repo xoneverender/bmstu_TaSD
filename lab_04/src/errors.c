@@ -31,7 +31,7 @@ err_code_e process_error(err_code_e rc)
             puts(RED"Ошибка: переполнение стека."RESET);
             break;
         case ERR_CALCULATIONS:
-            puts(RED"Ошибка во время вычислений."RESET);
+            puts(RED"Ошибка во время выполнения вычислений. Убедитесь, что выражение, лежащее на стеке, корректно."RESET);
             break;
         case ERR_DIVISION_BY_ZERO:
             puts(RED"Ошибка: попытка произвести деление на 0."RESET);
