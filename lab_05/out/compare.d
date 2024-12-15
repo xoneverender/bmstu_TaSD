@@ -5,5 +5,5 @@
 -Wvla
 -MM
 -MT
-out/queue.o
-src/queue.c
+out/compare.o
+src/compare.c

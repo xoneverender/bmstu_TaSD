@@ -1,11 +1,11 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#ifndef QUEUE
+#define QUEUE
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "errors.h"
 
-#define QUEUE_CAPACITY 3000
+#define QUEUE_CAPACITY 10000
 
 typedef struct 
 {
@@ -50,4 +50,4 @@ err_code_e free_list(void *queue);
 err_code_e init_arr_funcs(action_funcs_t *funcs);
 err_code_e init_list_funcs(action_funcs_t *funcs);
 
-#endif /* QUEUE_H */
+#endif /* QUEUE */

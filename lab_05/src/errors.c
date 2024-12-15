@@ -21,13 +21,13 @@ err_code_e process_error(err_code_e rc)
             puts(RED"Ошибка: нулевой указатель."RESET);
             break;
         case ERR_EMPTY_QUEUE:
-            puts(RED"Ошибка: стек пустой."RESET);
+            puts(RED"Ошибка: очередь пуста."RESET);
             break;
         case ERR_EMPTY_STRING:
             puts(RED"Ошибка: введена пустая строка."RESET);
             break;
         case ERR_QUEUE_OVERFLOW:
-            puts(RED"Ошибка: переполнение стека."RESET);
+            puts(RED"Ошибка: переполнение очереди."RESET);
     }
     return rc;
 }

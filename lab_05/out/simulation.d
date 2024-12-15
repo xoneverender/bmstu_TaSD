@@ -1,2 +1,9 @@
-out/simulation.o: src/simulation.c inc/simulation.h inc/errors.h \
- inc/colors.h inc/queue.h inc/io.h inc/simulation.h inc/str.h
+-Wall
+-Wno-unused-result
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/simulation.o
+src/simulation.c

@@ -9,7 +9,7 @@ err_code_e simulate(void)
     timing_data_t timings;
     action_funcs_t funcs;
     size_t counter = 0, processed_1 = 0, processed_2 = 0, entered_1 = 0, entered_2 = 0;
-    request_handler_t generator_1, generator_2, processor;
+    request_handler_t generator_1 = {0}, generator_2 = {0}, processor = {0};
     request_type_e processed_type;
     queue_event_t events;
     double current_time = 0.0, idle_time = 0.0;
@@ -18,7 +18,7 @@ err_code_e simulate(void)
     double avg_queue_time_1 = 0.0, avg_queue_time_2 = 0.0;
     double queue_time_sum_1 = 0.0, queue_time_sum_2 = 0.0;
     double prev_time = 0.0;
-    void *queue_1 = NULL, *queue_2 = NULL;
+    void *q1 = NULL, *q2 = NULL;
 
     // Сбор данных для запуска симуляции: пользовательские настройки интервалов, видимость адресов заявок, вид очереди (список/массив)
     if ((rc = collect_data_for_simulation(&adress_visibility, &time_settings, &mode)))
@@ -30,13 +30,13 @@ err_code_e simulate(void)
 
     if (mode == LIST)
     {
-        funcs.queue_1 = &queue_1;
-        funcs.queue_2 = &queue_2;
+        funcs.queue_1 = &q1;
+        funcs.queue_2 = &q2;
     }
     else
     {
-        funcs.queue_1 = queue_1;
-        funcs.queue_2 = queue_2;
+        funcs.queue_1 = q1;
+        funcs.queue_2 = q2;
     }
 
     // Инициализация функций для работы с заданным видом очереди
@@ -49,15 +49,12 @@ err_code_e simulate(void)
     {
         if ((rc = init_arr_funcs(&funcs)))
             return rc;
-    }
 
-    // Инициализация очередей
-    if (mode == ARRAY)
-    {
         if ((rc = funcs.create(&funcs.queue_1)))
             return rc;
         if ((rc = funcs.create(&funcs.queue_2)))
             return rc;
+
     }
 
     generator_1.request = NULL;
@@ -69,6 +66,7 @@ err_code_e simulate(void)
     events.next_remove = -1;
 
     processed_type = FIRST;
+
 
     // Симуляция
     while (counter < MAX_REQUESTS / CHECK_POINT)
@@ -85,7 +83,10 @@ err_code_e simulate(void)
                     free_all(&generator_1, &generator_2, &processor, funcs.queue_1, funcs.queue_2, funcs.free);
                     return rc;
                 }
-                entered_1++;       
+                
+                print_address(generator_1.request, "Добавление", adress_visibility, mode);
+
+                entered_1++;
                 generator_1.request = NULL;
             }
             // Если первый генератор пуст, генерируем заявку
@@ -104,7 +105,6 @@ err_code_e simulate(void)
             // print_queue(funcs.queue_1, mode);
             // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
 
-            
             // Если подошло время добавить вторую заявку в очередь
             if (generator_2.request && events.next_add_type2 == current_time)
             {
@@ -113,10 +113,13 @@ err_code_e simulate(void)
                 if ((rc = funcs.enqueue(funcs.queue_2, generator_2.request)))
                 {
                     // puts("Строка 95. Тут.");
-                    // free_all(&generator_1, &generator_2, &processor, funcs.queue_1, funcs.queue_2, funcs.free);
+                    free_all(&generator_1, &generator_2, &processor, funcs.queue_1, funcs.queue_2, funcs.free);
                     return rc;
-                }   
-                entered_2++;             
+                }
+
+                print_address(generator_2.request, "Добавление", adress_visibility, mode);
+                
+                entered_2++;
                 generator_2.request = NULL;
             }
             // Если второй генератор пуст, генерируем заявку
@@ -146,13 +149,13 @@ err_code_e simulate(void)
                 else if (processed_type == SECOND)
                     processed_2++;
             }
-            // Проверка того, можно ли на текущем этапе поместить заявку в очередь
+            // Проверка того, можно ли на текущем этапе поместить заявку в ОА
             if (processor.request == NULL)
             {
                 // Если первая очередь не пустая, помещаем заявку из очереди в ОА
                 if (!is_empty(funcs.queue_1, mode))
                 {
-                    
+
                     // DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG
                     // puts("Строка 143. Массив №1 не пустой.");
                     // puts("Строка 129. Массив №1.");
@@ -163,7 +166,9 @@ err_code_e simulate(void)
                     {
                         free_all(&generator_1, &generator_2, &processor, funcs.queue_1, funcs.queue_2, funcs.free);
                         return rc;
-                    }     
+                    }
+
+                    print_address(processor.request, "Удаление", adress_visibility, mode);
 
                     queue_time_sum_1 += current_time - processor.request->enqueue_time;
                     processed_type = FIRST;
@@ -184,9 +189,14 @@ err_code_e simulate(void)
                         free_all(&generator_1, &generator_2, &processor, funcs.queue_1, funcs.queue_2, funcs.free);
                         return rc;
                     }
+
+                    print_address(processor.request, "Удаление", adress_visibility, mode);
+
                     queue_time_sum_2 += current_time - processor.request->enqueue_time;
                     processed_type = SECOND;
                     events.next_remove = current_time + processor.request->processing_time;
+                    // printf("[%lf] Proc.: starting new task (type 2), enqueue moment: %lf, will be executed at %lf\n", current_time, processor.request->enqueue_time, events.next_remove);
+
                 }
                 // Если обе очереди пустые и процессор простаивает, записываем время простоя
                 else
@@ -208,40 +218,65 @@ err_code_e simulate(void)
             current_time = get_min_positive_time(events);
         }
         counter++;
-        
+
         // Подсчет средней длины очередей
         avg_queue_length_1 = queue_length_sum_1 / current_time;
         avg_queue_length_2 = queue_length_sum_2 / current_time;
 
         // Подсчет среднего времени пребывания заявки в очереди (учитываем только те, что к этому моменту вышли из очереди)
-        avg_queue_time_1 = queue_time_sum_1 / processed_1;
-        avg_queue_time_2 = queue_time_sum_2 / processed_2;
+        avg_queue_time_1 = processed_1 ? queue_time_sum_1 / processed_1 : INFINITY;
+        avg_queue_time_2 = processed_2 ? queue_time_sum_2 / processed_2 : INFINITY;
 
         results_for_one_queue(queue_length(funcs.queue_1, mode), avg_queue_length_1, avg_queue_time_1, entered_1, processed_1, FIRST);
         results_for_one_queue(queue_length(funcs.queue_2, mode), avg_queue_length_2, avg_queue_time_2, entered_2, processed_2, SECOND);
     }
 
-    summary(prev_time, idle_time);
+    summary(prev_time, idle_time, calc_error(timings, prev_time));
 
     free_all(&generator_1, &generator_2, &processor, funcs.queue_1, funcs.queue_2, funcs.free);
 
     return ERR_SUCCESS;
 }
 
-
-void print_queue(void *queue, mode_e mode) 
+double calc_error(timing_data_t time_settings, double total_time)
 {
-    if (!queue) 
+    double total_theor_time;
+
+    // Рассчет средних значений временных интервалов
+    double time_to_enter_first = (time_settings.interval_type1.end + time_settings.interval_type1.start) / 2.0;
+    double time_to_process_first = (time_settings.processing_time1.end + time_settings.processing_time1.start) / 2.0;
+    double time_to_enter_second = (time_settings.interval_type2.end + time_settings.interval_type2.start) / 2.0;
+    double time_to_process_second = (time_settings.processing_time2.end + time_settings.processing_time2.start) / 2.0;
+
+    // Если заявки приходят быстрее, чем их можно обработать, то общий процесс будет ограничен временем обработки
+    if (time_to_process_first >= time_to_enter_first)
+    {
+        total_theor_time = time_to_process_first * MAX_REQUESTS;
+    }
+    else
+    {
+        // Максимальное из времени прихода 1000 первых и обработки 1000 первых + обработки того колва вторых что придет за это время обработки
+        total_theor_time = fmax(time_to_enter_first * MAX_REQUESTS, time_to_process_first * MAX_REQUESTS + time_to_process_second * (time_to_enter_first / time_to_enter_second * MAX_REQUESTS));
+    }
+    printf(BOLD "Общее теоретическое время: %lf\n" RESET, total_theor_time);
+
+    double error = (1 - (total_time / total_theor_time)) * 100;
+    return error < 0 ? -error : error;
+}
+
+void print_queue(void *queue, mode_e mode)
+{
+    if (!queue)
     {
         printf("Очередь пуста или не инициализирована.\n");
         return;
     }
 
-    if (mode == ARRAY) 
+    if (mode == ARRAY)
     {
         queue_arr_t *arr_ptr = (queue_arr_t *)queue;
 
-        if (arr_ptr->elems_count == 0) 
+        if (arr_ptr->elems_count == 0)
         {
             printf("Очередь пуста.\n");
             return;
@@ -253,18 +288,18 @@ void print_queue(void *queue, mode_e mode)
 
         printf("Индекс головы: %d\n", arr_ptr->head_ind);
         printf("Очередь (массив):\n");
-        for (int i = 0; i < arr_ptr->elems_count; i++) 
+        for (int i = 0; i < arr_ptr->elems_count; i++)
         {
             int index = (arr_ptr->head_ind + i) % QUEUE_CAPACITY;
             printf("Элемент %d: время генерации = %.2f, время обработки = %.2f\n",
                    i + 1, arr_ptr->requests[index]->generation_moment, arr_ptr->requests[index]->processing_time);
         }
-    } 
-    else if (mode == LIST) 
+    }
+    else if (mode == LIST)
     {
         queue_list_t *list_ptr = (queue_list_t *)queue;
 
-        if (!list_ptr) 
+        if (!list_ptr)
         {
             printf("Очередь пуста.\n");
             return;
@@ -272,9 +307,9 @@ void print_queue(void *queue, mode_e mode)
 
         printf("Очередь (список):\n");
         int count = 1;
-        while (list_ptr) 
+        while (list_ptr)
         {
-            if (list_ptr->request == NULL) 
+            if (list_ptr->request == NULL)
             {
                 printf("Элемент %d: NULL (ошибка данных)\n", count++);
                 list_ptr = list_ptr->next;
@@ -285,30 +320,37 @@ void print_queue(void *queue, mode_e mode)
                    count++, list_ptr->request->generation_moment, list_ptr->request->processing_time);
             list_ptr = list_ptr->next;
         }
-    } 
-    else 
+    }
+    else
     {
         printf("Неизвестный тип очереди.\n");
     }
 }
 
-void results_for_one_queue(int curr_len, double avg_len, double avg_time_in_queue, int entered, int exited, request_type_e type)
+void print_address(void *addr, char *operation, visibility_e vis, mode_e mode)
+{
+    if (vis == VISIBLE && mode == LIST)
+        printf("Операция: %s. Адрес элемента: %p\n", operation, addr);
+}
+
+void results_for_one_queue(double curr_len, double avg_len, double avg_time_in_queue, int entered, int exited, request_type_e type)
 {
     if (type == FIRST)
-        printf("====== Обработано %d заявок первого типа ======\n", exited);
+        printf("\n====== Обработано %d заявок первого типа ======\n", exited);
 
     printf(BOLD "Для очереди %d\n" RESET, (int)type);
-    printf("Текущая длина очереди: %d\n", curr_len);
+    printf("Текущая длина очереди: %lf\n", curr_len);
     printf("Средняя длина очереди: %lf\n", avg_len);
     printf("Количество вошедших заявок: %d\n", entered);
     printf("Количество вышедших заявок: %d\n", exited);
     printf("Среднее время пребывания в очереди: %lf\n\n", avg_time_in_queue);
-} 
+}
 
-void summary(double simulation_time, double idle_time)
-{   
+void summary(double simulation_time, double idle_time, double error_entered_1)
+{
     printf(BOLD "Время простоя обслуживающего аппарата: %lf\n" RESET, idle_time);
-    printf(BOLD "Время моделирования составило %lf\n" RESET, simulation_time);
+    printf(BOLD "Время моделирования: %lf\n" RESET, simulation_time);
+    printf(BOLD "Погрешность составила: %lf%%\n" RESET, error_entered_1);
 }
 
 int queue_length(void *queue, mode_e mode)
@@ -369,7 +411,7 @@ bool is_empty(void *queue, mode_e mode)
     }
 }
 
-double get_min_positive_time(queue_event_t events) 
+double get_min_positive_time(queue_event_t events)
 {
     double min_time = FLT_MAX;
 
@@ -441,43 +483,56 @@ err_code_e get_time_intervals(timing_data_t *timings, time_settings_e time_setti
     }
     else
     {
-        if ((rc = set_interval(&timings->interval_type1)))
+        if ((rc = set_interval(&timings->interval_type1, "генерации задач первого типа.")))
             return rc;
-        if ((rc = set_interval(&timings->interval_type2)))
+        if ((rc = set_interval(&timings->interval_type2, "генерации задач второго типа.")))
             return rc;
-        if ((rc = set_interval(&timings->processing_time1)))
+        if ((rc = set_interval(&timings->processing_time1, "обработки задач первого типа.")))
             return rc;
-        if ((rc = set_interval(&timings->processing_time2)))
+        if ((rc = set_interval(&timings->processing_time2, "обработки задач второго типа.")))
             return rc;
     }
     return ERR_SUCCESS;
 }
 
-err_code_e set_interval(interval_t *interval)
+err_code_e set_interval(interval_t *interval, char *name)
 {
     err_code_e rc;
     char *prompt, *error_message;
     double border_1, border_2;
 
-    prompt = "Введите вещественную границу интервала:\n";
-    error_message = "Граница интервала должна быть вещественным числом. Повторите ввод.";
-    if ((rc = get_double_from_stdin(prompt, &border_1, error_message)))
-        return rc;
-
-    prompt = "Введите вещественную границу интервала:\n";
-    error_message = "Граница интервала должна быть вещественным числом. Повторите ввод.";
-    if ((rc = get_double_from_stdin(prompt, &border_2, error_message)))
-        return rc;
-
-    if (border_1 > border_2)
+    while (true)
     {
-        interval->start = border_2;
-        interval->end = border_1;
-    }
-    else
-    {
-        interval->start = border_1;
-        interval->end = border_2;
+        printf(BOLD "Интервал %s\n" RESET, name);
+        prompt = "Введите первую границу интервала (вещественное число):";
+        error_message = "Граница интервала должна быть неотрицательным вещественным числом. Повторите ввод.";
+        if ((rc = get_double_from_stdin(prompt, &border_1, 0, error_message)))
+            return rc;
+
+        prompt = "Введите вторую границу интервала (вещественное число):";
+        error_message = "Граница интервала должна быть неотрицательным вещественным числом. Повторите ввод.";
+        if ((rc = get_double_from_stdin(prompt, &border_2, 0, error_message)))
+            return rc;
+
+        puts("");
+
+        if (border_1 > border_2)
+        {
+            interval->start = border_2;
+            interval->end = border_1;
+        }
+        else
+        {
+            interval->start = border_1;
+            interval->end = border_2;
+        }
+
+        if (border_1 == 0 && border_2 == 0)
+        {
+            puts(RED "Интервал не может быть [0,0]. Повторите ввод.\n" RESET);
+        }
+        else
+            break;
     }
 
     return ERR_SUCCESS;
@@ -490,7 +545,7 @@ err_code_e generate_request(request_t **request, timing_data_t timings, request_
     *request = malloc(sizeof(request_t));
     if (!*request)
         return ERR_ALLOCATING_MEMORY;
-    
+
     if (type == FIRST)
     {
         interval = timings.interval_type1;

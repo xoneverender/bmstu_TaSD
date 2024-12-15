@@ -1,1 +1,9 @@
-out/errors.o: src/errors.c inc/errors.h inc/colors.h
+-Wall
+-Wno-unused-result
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/errors.o
+src/errors.c

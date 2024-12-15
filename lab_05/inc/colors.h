@@ -1,5 +1,5 @@
-#ifndef COLORS
-#define COLORS
+#ifndef COLORS_H
+#define COLORS_H
 
 // Цвета текста
 #define RESET "\033[0m"
@@ -45,5 +45,5 @@
 
 #define BOLD "\033[1m"         // Жирный текст
 
-#endif /* COLORS */
+#endif /* COLORS_H */
 

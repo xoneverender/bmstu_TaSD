@@ -1,3 +1,4 @@
+#include <time.h>
 #include "queue.h"
 #include "errors.h"
 #include "str.h"
@@ -12,9 +13,12 @@ int main(void)
     char *prompt, *error_message;
     long choice;
 
+    srand(time(NULL));
+
     while (true)
     {
         main_menu();
+        
         
         prompt = "Выберите действие (от 0 до 2): ";
         error_message = "Выбранный пункт меню должен быть целым числом от 0 до 2. Повторите ввод.";

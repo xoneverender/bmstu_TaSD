@@ -51,7 +51,5 @@ bool is_double(double *num, char *buffer)
 
 double random_double(double min, double max) 
 {
-    srand((unsigned int)time(NULL));
-    
     return min + (rand() / (double)RAND_MAX) * (max - min);
 }

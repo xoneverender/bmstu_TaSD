@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <float.h>
+#include <math.h>
 #include "errors.h"
 #include "queue.h"
 #include "io.h"
@@ -66,15 +67,16 @@ typedef struct
 int queue_length(void *queue, mode_e mode);
 double get_min_positive_time(queue_event_t events);
 void free_all(request_handler_t *generator_1, request_handler_t *generator_2, request_handler_t *processor, void *queue_1, void *queue_2, err_code_e (*free_func)(void *));
-void results_for_one_queue(int curr_len, double avg_len, double avg_time_in_queue, int entered, int exited, request_type_e type);
-void summary(double simulation_time, double idle_time);
+void results_for_one_queue(double curr_len, double avg_len, double avg_time_in_queue, int entered, int exited, request_type_e type);
+void summary(double simulation_time, double idle_time, double error_entered_1);
 bool is_empty(void *queue, mode_e mode);
 err_code_e collect_data_for_simulation(visibility_e *adress_visibility, time_settings_e *time_settings, mode_e *mode);
 err_code_e get_time_intervals(timing_data_t *timings, time_settings_e time_settings);
-err_code_e set_interval(interval_t *interval);
+err_code_e set_interval(interval_t *interval, char *name);
 err_code_e generate_request(request_t **request, timing_data_t timings, request_type_e type, double generation_moment);
 err_code_e simulate(void);
 void print_queue(void *queue, mode_e mode);
-void *get_queue_ptr(void *queue, mode_e mode);
+double calc_error(timing_data_t time_settings, double total_time);
+void print_address(void *addr, char *operation, visibility_e vis, mode_e mode);
 
 #endif /* SIMULATION */

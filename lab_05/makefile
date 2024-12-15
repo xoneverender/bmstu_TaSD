@@ -4,7 +4,7 @@ SRC_DIR = src
 INC_DIR = inc
 OUT_DIR = out
 TEST_DIR = unit_tests
-CFLAGS = -std=c99 -Wall -Wno-unused-result -Werror -Wpedantic -Wextra -Wvla -I$(INC_DIR)
+CFLAGS = -std=c99 -Wall -Wno-unused-result -Wpedantic -Wextra -Wvla -I$(INC_DIR)
 LDFLAGS = -lm
 EXEC = app.exe
 
