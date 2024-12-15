@@ -1,0 +1,9 @@
+-Wall
+-Wno-unused-result
+-Wpedantic
+-Wextra
+-Wvla
+-MM
+-MT
+out/queue.o
+src/queue.c
